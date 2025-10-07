@@ -23,7 +23,6 @@ public class OrderConsumer {
         try {
             log.info("Processing message: " + message);
             
-            // Validações de negócio conforme o exemplo do estudo
             if (message.orderId() == null || message.orderId().trim().isEmpty()) {
                 throw new IllegalArgumentException("OrderId cannot be null or empty");
             }
@@ -45,19 +44,16 @@ public class OrderConsumer {
                 }
             }
             
-            // Simulando processamento (aqui você pode simular lógica de estoque ou notificação)
             Thread.sleep(1000);
             log.info("Order processed successfully for orderId: " + message.orderId());
             
-            // Confirmação manual de processamento bem-sucedido
             channel.basicAck(tag, false);
             log.info("Message acknowledged successfully for orderId: " + message.orderId());
             
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             log.error("Error processing order: " + message.orderId(), e);
-            // decisão: requeue ou descartar
-            boolean requeue = true; // requeue para erros de interrupção
+            boolean requeue = true; 
             try {
                 channel.basicNack(tag, false, requeue);
                 log.warn("Message requeued due to interruption for orderId: " + message.orderId());
@@ -66,8 +62,7 @@ public class OrderConsumer {
             }
         } catch (Exception ex) {
             log.error("Unexpected error processing order: " + message.orderId(), ex);
-            // decisão: requeue ou descartar
-            boolean requeue = false; // não reencaminhar para evitar loop infinito
+            boolean requeue = false; 
             try {
                 channel.basicNack(tag, false, requeue);
                 log.warn("Message rejected without requeue for orderId: " + message.orderId());

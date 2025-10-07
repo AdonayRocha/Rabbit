@@ -15,14 +15,14 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class RabbitConfig {
-    // definindo constantes para facilitar manutenção
+
+    // Define como constante 
     public static final String EXCHANGE_NAME = "order.exchange";
     public static final String QUEUE_NAME = "order.queue";
     public static final String ROUTING_KEY = "order.created";
 
     @Bean
     public Queue orderQueue() {
-        // durable = true: garante que a fila sobreviva a reinícios do broker
         return new Queue(QUEUE_NAME, true);
     }
 
@@ -33,7 +33,6 @@ public class RabbitConfig {
 
     @Bean
     public Binding orderBinding(Queue orderQueue, DirectExchange orderExchange) {
-        // vincula a fila à exchange com a routing key especificada
         return BindingBuilder.bind(orderQueue).to(orderExchange).with(ROUTING_KEY);
     }
 
