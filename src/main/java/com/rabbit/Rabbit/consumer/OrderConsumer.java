@@ -21,14 +21,33 @@ public class OrderConsumer {
                                     Channel channel,
                                     @Header(AmqpHeaders.DELIVERY_TAG) long tag) {
         try {
-            // lógica de negócio aqui
             log.info("Processing message: " + message);
             
+            if (message.orderId() == null || message.orderId().trim().isEmpty()) {
+                throw new IllegalArgumentException("OrderId cannot be null or empty");
+            }
+            
+            if (message.clientId() == null || message.clientId().trim().isEmpty()) {
+                throw new IllegalArgumentException("ClientId cannot be null or empty");
+            }
+            
+            if (message.items() == null || message.items().isEmpty()) {
+                throw new IllegalArgumentException("Order must have at least one item");
+            }
+            
+            for (var item : message.items()) {
+                if (item.quantity() <= 0) {
+                    throw new IllegalArgumentException("Item quantity must be positive: " + item.productId());
+                }
+                if (item.productId() == null || item.productId().trim().isEmpty()) {
+                    throw new IllegalArgumentException("ProductId cannot be null or empty");
+                }
+            }
+            
             // Simulando processamento
-            Thread.sleep(1000); // Simula processamento de 1 segundo
+            Thread.sleep(1000);
             log.info("Order processed successfully for orderId: " + message.orderId());
             
-            // se tudo OK:
             channel.basicAck(tag, false);
             log.info("Message acknowledged successfully for orderId: " + message.orderId());
             
@@ -46,7 +65,7 @@ public class OrderConsumer {
         } catch (Exception ex) {
             log.error("Unexpected error processing order: " + message.orderId(), ex);
             // decisão: requeue ou descartar
-            boolean requeue = false; // não requeue para erros gerais (evita loop infinito)
+            boolean requeue = false; 
             try {
                 channel.basicNack(tag, false, requeue);
                 log.warn("Message rejected without requeue for orderId: " + message.orderId());

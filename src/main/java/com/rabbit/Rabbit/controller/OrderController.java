@@ -21,9 +21,7 @@ public class OrderController {
 
     @PostMapping
     public ResponseEntity<String> createOrder(@RequestBody OrderCreatedMessage message) {
-        // Publica a mensagem no broker
         orderPublisher.publishOrderCreated(message);
-        // Retorna resposta simples para o cliente
         return ResponseEntity.ok("Order message published: " + message.orderId());
     }
 }
